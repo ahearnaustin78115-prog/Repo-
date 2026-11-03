@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Thoughtful technology updates, delivered by email.">
+  <title>Main — Technology, thoughtfully</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0b1020;
+      color: #eef2ff;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; }
+    a { color: inherit; }
+    .wrap { width: min(100% - 2rem, 1080px); margin: 0 auto; }
+    header { height: 84px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; gap: .7rem; align-items: center; text-decoration: none; font-weight: 750; letter-spacing: -.03em; }
+    .mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; background: #a78bfa; color: #17112d; }
+    .admin-link { color: #b7bfd8; font-size: .9rem; text-decoration: none; }
+    .hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 4rem; align-items: center; min-height: 590px; padding: 3rem 0 5rem; }
+    .eyebrow { color: #a78bfa; font-size: .78rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { max-width: 650px; margin: 1rem 0 1.25rem; font-size: clamp(3rem, 7vw, 5.4rem); line-height: .99; letter-spacing: -.065em; }
+    .intro { max-width: 510px; color: #aab3cd; font-size: 1.1rem; line-height: 1.75; }
+    .card { padding: 2rem; border: 1px solid #29314b; border-radius: 20px; background: linear-gradient(145deg, #151d34, #101629); box-shadow: 0 24px 80px #05081280; }
+    .card h2 { margin: 0 0 .6rem; font-size: 1.35rem; letter-spacing: -.03em; }
+    .card p { margin: 0 0 1.5rem; color: #aab3cd; line-height: 1.6; }
+    label { display: block; margin-bottom: .5rem; color: #d7ddf0; font-size: .9rem; font-weight: 600; }
+    input[type="email"] { width: 100%; padding: .9rem 1rem; border: 1px solid #3b4563; border-radius: 10px; outline: none; background: #0b1020; color: #fff; font: inherit; }
+    input[type="email"]:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px #a78bfa30; }
+    button { width: 100%; margin-top: .8rem; padding: .95rem 1rem; border: 0; border-radius: 10px; background: #a78bfa; color: #17112d; cursor: pointer; font: inherit; font-weight: 750; }
+    button:hover { background: #b9a5ff; }
+    .fine-print { margin-top: 1rem !important; margin-bottom: 0 !important; font-size: .8rem; }
+    .notice { margin: 0 0 1rem; padding: .8rem 1rem; border-radius: 10px; background: #1d2942; color: #dfe7ff; font-size: .9rem; }
+    .notice.error { background: #40202d; color: #ffd9df; }
+    footer { padding: 1.5rem 0; border-top: 1px solid #222a40; color: #8e98b5; font-size: .85rem; }
+    @media (max-width: 760px) { .hero { grid-template-columns: 1fr; gap: 2rem; min-height: auto; padding: 4rem 0; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="/" aria-label="Main home"><span class="mark">M</span><span>Main</span></a>
+      <a class="admin-link" href="{{ url_for('admin_login') }}">Admin</a>
+    </header>
+    <main class="hero">
+      <section>
+        <p class="eyebrow">A clearer view of what's next</p>
+        <h1>Technology, thoughtfully.</h1>
+        <p class="intro">Get a concise roundup of ideas, tools, and developments shaping the tech world. No noise—just useful updates, delivered occasionally.</p>
+      </section>
+      <section class="card" aria-labelledby="signup-title">
+        <h2 id="signup-title">Stay in the loop</h2>
+        <p>Join the subscriber list for thoughtful technology updates.</p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+            <p class="notice {{ category }}" role="status">{{ message }}</p>
+          {% endfor %}
+        {% endwith %}
+        <form action="{{ url_for('subscribe') }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" maxlength="254" autocomplete="email" placeholder="you@example.com" required>
+          <button type="submit">Subscribe</button>
+        </form>
+        <p class="fine-print">By subscribing, you agree to receive email updates. You can contact the site administrator to be removed.</p>
+      </section>
+    </main>
+    <footer>© Main · Technology, thoughtfully</footer>
+  </div>
+</body>
+</html>

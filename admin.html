@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Subscribers — Main Admin</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #0b1020; color: #eef2ff; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 900px); margin: 4rem auto; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    a { color: #b9a5ff; text-decoration: none; }
+    h1 { margin-bottom: .4rem; letter-spacing: -.04em; }
+    .muted { color: #aab3cd; }
+    table { width: 100%; margin-top: 2rem; border-collapse: collapse; }
+    th, td { padding: 1rem .75rem; border-bottom: 1px solid #29314b; text-align: left; }
+    th { color: #aab3cd; font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; }
+    .toolbar { display: flex; align-items: center; gap: .75rem; }
+    button { padding: .65rem .9rem; border: 1px solid #3b4563; border-radius: 8px; background: #151d34; color: #eef2ff; cursor: pointer; font: inherit; }
+    button:hover { border-color: #a78bfa; }
+    .delete { color: #ffc2ce; }
+    .empty { margin-top: 2rem; padding: 2rem; border: 1px dashed #3b4563; border-radius: 12px; text-align: center; color: #aab3cd; }
+    .notice { margin-top: 1.5rem; padding: .8rem 1rem; border-radius: 8px; background: #1d2942; }
+    @media (max-width: 600px) { th:nth-child(2), td:nth-child(2) { display: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <a href="/">← Main</a>
+        <h1>Subscribers</h1>
+        <p class="muted">{{ subscribers|length }} subscriber{{ "" if subscribers|length == 1 else "s" }}</p>
+      </div>
+      <form class="toolbar" action="{{ url_for('admin_logout') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit">Sign out</button>
+      </form>
+    </header>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <p class="notice" role="status">{{ message }}</p>
+      {% endfor %}
+    {% endwith %}
+    {% if subscribers %}
+      <table>
+        <thead><tr><th>Email</th><th>Subscribed</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for subscriber in subscribers %}
+            <tr>
+              <td>{{ subscriber.email }}</td>
+              <td>{{ subscriber.subscribed_at }}</td>
+              <td>
+                <form action="{{ url_for('delete_subscriber', subscriber_id=subscriber.id) }}" method="post">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="delete" type="submit" aria-label="Remove {{ subscriber.email }}">Remove</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty">No subscribers yet. New sign-ups will appear here.</div>
+    {% endif %}
+  </main>
+</body>
+</html>
