@@ -1,6 +1,5 @@
 import hmac
 import os
-import re
 import secrets
 import sqlite3
 from pathlib import Path
@@ -8,7 +7,9 @@ from pathlib import Path
 from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
 
 
-EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+LOCAL_EMAIL_CHARACTERS = set(
+    "abcdefghijklmnopqrstuvwxyz0123456789.!#$%&'*+/=?^_`{|}~-"
+)
 
 
 def create_app(test_config=None):
@@ -63,6 +64,32 @@ def create_app(test_config=None):
     def is_admin():
         return session.get("is_admin") is True
 
+    def is_valid_email(email):
+        if len(email) > 254 or email.count("@") != 1:
+            return False
+        local, domain = email.rsplit("@", 1)
+        if (
+            not local
+            or len(local) > 64
+            or local.startswith(".")
+            or local.endswith(".")
+            or ".." in local
+            or any(character not in LOCAL_EMAIL_CHARACTERS for character in local)
+        ):
+            return False
+        labels = domain.split(".")
+        if len(labels) < 2:
+            return False
+        return all(
+            label
+            and len(label) <= 63
+            and label[0].isalnum()
+            and label[-1].isalnum()
+            and all(character.isascii() and (character.isalnum() or character == "-")
+                    for character in label)
+            for label in labels
+        )
+
     @app.get("/")
     def index():
         return render_template("index.html")
@@ -71,7 +98,7 @@ def create_app(test_config=None):
     def subscribe():
         require_csrf()
         email = request.form.get("email", "").strip().lower()
-        if len(email) > 254 or not EMAIL_PATTERN.fullmatch(email):
+        if not is_valid_email(email):
             flash("Enter a valid email address.", "error")
             return redirect(url_for("index"))
 
